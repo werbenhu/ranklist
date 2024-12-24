@@ -13,7 +13,7 @@ func BenchmarkSkipListInsertRandom(b *testing.B) {
 	list := NewSkiplist[float64, int]()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		list.Insert(rand.Float64(), i)
+		list.Set(rand.Float64(), i)
 	}
 }
 
@@ -22,7 +22,7 @@ func BenchmarkSkipListInsertSorted(b *testing.B) {
 	list := NewSkiplist[float64, int]()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		list.Insert(float64(i), i)
+		list.Set(float64(i), i)
 	}
 }
 

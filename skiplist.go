@@ -70,10 +70,10 @@ func randomLevel() int {
 }
 
 // Insert 向跳表中插入一个新的节点
-func (sl *Skiplist[K, V]) Insert(key K, value V) {
+func (sl *Skiplist[K, V]) Set(key K, value V) {
 	// 如果节点已经存在，先删除旧节点
 	if node, exists := sl.dict[key]; exists {
-		sl.Delete(node.key)
+		sl.Del(node.key)
 	}
 
 	update := make([]*Node[K, V], MAXLEVEL) // 用于存储每一层的前驱节点
@@ -135,8 +135,8 @@ func (sl *Skiplist[K, V]) Insert(key K, value V) {
 	sl.length++
 }
 
-// Delete 从跳表中删除指定的节点
-func (sl *Skiplist[K, V]) Delete(key K) bool {
+// Del 从跳表中删除指定的节点
+func (sl *Skiplist[K, V]) Del(key K) bool {
 	node, exists := sl.dict[key]
 	if !exists {
 		return false // 如果节点不存在，返回false
@@ -179,7 +179,7 @@ func (sl *Skiplist[K, V]) Delete(key K) bool {
 }
 
 // GetScore 获取指定key的score值
-func (sl *Skiplist[K, V]) GetScore(key K) V {
+func (sl *Skiplist[K, V]) Get(key K) V {
 	if node, exists := sl.dict[key]; exists {
 		return node.value // 返回节点的score
 	}
@@ -187,7 +187,7 @@ func (sl *Skiplist[K, V]) GetScore(key K) V {
 }
 
 // GetRank 获取指定key的rank（排名）
-func (sl *Skiplist[K, V]) GetRank(key K) int {
+func (sl *Skiplist[K, V]) Rank(key K) int {
 	node, exists := sl.dict[key]
 	if !exists {
 		return 0 // 如果节点不存在，返回0
@@ -216,17 +216,17 @@ func (sl *Skiplist[K, V]) GetRank(key K) int {
 	return rank
 }
 
-// Print 打印跳表的结构，展示各层的key和span
-func (sl *Skiplist[K, V]) Print() {
-	for i := sl.level - 1; i >= 0; i-- {
-		current := sl.header.forward[i] // 从该层的第一个节点开始
-		print("Level ", i, ": ")
+// // Print 打印跳表的结构，展示各层的key和span
+// func (sl *Skiplist[K, V]) Print() {
+// 	for i := sl.level - 1; i >= 0; i-- {
+// 		current := sl.header.forward[i] // 从该层的第一个节点开始
+// 		print("Level ", i, ": ")
 
-		// 遍历当前层的所有节点
-		for current != nil {
-			print("[", current.key, ",", current.span[i], "] ") // 打印key和span
-			current = current.forward[i]                        // 移动到当前层的下一个节点
-		}
-		print("\n")
-	}
-}
+// 		// 遍历当前层的所有节点
+// 		for current != nil {
+// 			print("[", current.key, ",", current.span[i], "] ") // 打印key和span
+// 			current = current.forward[i]                        // 移动到当前层的下一个节点
+// 		}
+// 		print("\n")
+// 	}
+// }
