@@ -1,4 +1,4 @@
-# rankList
+# ranklist
 
 一个基于跳表(Skip List)实现的高性能排行榜数据结构。
 A high-performance ranking system implementation based on Skip List.
