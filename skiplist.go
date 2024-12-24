@@ -9,40 +9,54 @@ const (
 	PROBABILITY = 0.25 // 每层节点生成的概率
 )
 
-// Skiplist中的节点结构
-type Node struct {
-	key     int     // 节点的键
-	score   float64 // 节点的分数
-	forward []*Node // 指向下一个节点的指针数组
-	span    []int   // 存储每层跨越的节点数量
-	level   int     // 节点的层级
+// Ordered 定义可比较的类型集合
+type Ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64 |
+		~string
 }
 
-// Skiplist结构
-type Skiplist struct {
-	header *Node         // 跳表的头节点
-	dict   map[int]*Node // 用于存储键值对的字典，方便快速查找
-	level  int           // 当前跳表的最大层级
-	length int           // 跳表中节点的总数
+// Zero 返回类型 K 的默认零值
+func Zero[K Ordered]() K {
+	var zero K // 声明一个 K 类型的零值变量
+	return zero
 }
 
-// 创建一个新的节点
-func NewNode(key int, score float64, level int) *Node {
-	return &Node{
+// Node Skiplist中的节点结构
+type Node[K Ordered, V Ordered] struct {
+	key     K             // 节点的键
+	value   V             // 节点的分数
+	forward []*Node[K, V] // 指向下一个节点的指针数组
+	span    []int         // 存储每层跨越的节点数量
+	level   int           // 节点的层级
+}
+
+// Skiplist Skiplist结构
+type Skiplist[K Ordered, V Ordered] struct {
+	header *Node[K, V]       // 跳表的头节点
+	dict   map[K]*Node[K, V] // 用于存储键值对的字典，方便快速查找
+	level  int               // 当前跳表的最大层级
+	length int               // 跳表中节点的总数
+}
+
+// NewNode 创建一个新的节点
+func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
+	return &Node[K, V]{
 		key:     key,
-		score:   score,
-		forward: make([]*Node, level), // 根据节点的层级分配指针数组
-		span:    make([]int, level),   // 根据节点的层级分配跨度数组
+		value:   value,
+		forward: make([]*Node[K, V], level), // 根据节点的层级分配指针数组
+		span:    make([]int, level),         // 根据节点的层级分配跨度数组
 		level:   level,
 	}
 }
 
-// 创建一个新的跳表
-func NewSkiplist() *Skiplist {
-	return &Skiplist{
-		header: NewNode(0, 0, MAXLEVEL), // 创建一个头节点
-		dict:   make(map[int]*Node),     // 初始化字典
-		level:  1,                       // 初始跳表层级为1
+// NewSkiplist 创建一个新的跳表
+func NewSkiplist[K Ordered, V Ordered]() *Skiplist[K, V] {
+	return &Skiplist[K, V]{
+		header: NewNode[K, V](Zero[K](), Zero[V](), MAXLEVEL), // 创建一个头节点
+		dict:   make(map[K]*Node[K, V]),                       // 初始化字典
+		level:  1,                                             // 初始跳表层级为1
 	}
 }
 
@@ -55,16 +69,16 @@ func randomLevel() int {
 	return level
 }
 
-// 向跳表中插入一个新的节点
-func (sl *Skiplist) Insert(key int, score float64) {
+// Insert 向跳表中插入一个新的节点
+func (sl *Skiplist[K, V]) Insert(key K, value V) {
 	// 如果节点已经存在，先删除旧节点
 	if node, exists := sl.dict[key]; exists {
 		sl.Delete(node.key)
 	}
 
-	update := make([]*Node, MAXLEVEL)  // 用于存储每一层的前驱节点
-	rankArray := make([]int, MAXLEVEL) // 用于记录每一层的rank值
-	current := sl.header               // 从头节点开始遍历
+	update := make([]*Node[K, V], MAXLEVEL) // 用于存储每一层的前驱节点
+	rankArray := make([]int, MAXLEVEL)      // 用于记录每一层的rank值
+	current := sl.header                    // 从头节点开始遍历
 
 	// 遍历每一层
 	for i := sl.level - 1; i >= 0; i-- {
@@ -77,8 +91,8 @@ func (sl *Skiplist) Insert(key int, score float64) {
 
 		// 寻找合适的位置
 		for current.forward[i] != nil &&
-			(current.forward[i].score < score || // 按照score升序排列
-				(current.forward[i].score == score && current.forward[i].key < key)) { // 如果score相同，则按照key升序排列
+			(current.forward[i].value < value || // 按照score升序排列
+				(current.forward[i].value == value && current.forward[i].key < key)) { // 如果score相同，则按照key升序排列
 			rankArray[i] += current.span[i]
 			current = current.forward[i]
 		}
@@ -97,7 +111,7 @@ func (sl *Skiplist) Insert(key int, score float64) {
 	}
 
 	// 创建新节点
-	newNode := NewNode(key, score, level)
+	newNode := NewNode[K, V](key, value, level)
 	sl.dict[key] = newNode
 
 	// 插入节点并更新前驱节点的forward指针
@@ -121,21 +135,21 @@ func (sl *Skiplist) Insert(key int, score float64) {
 	sl.length++
 }
 
-// 从跳表中删除指定的节点
-func (sl *Skiplist) Delete(key int) bool {
+// Delete 从跳表中删除指定的节点
+func (sl *Skiplist[K, V]) Delete(key K) bool {
 	node, exists := sl.dict[key]
 	if !exists {
 		return false // 如果节点不存在，返回false
 	}
 
-	update := make([]*Node, sl.level) // 用于存储每一层的前驱节点
-	current := sl.header              // 从头节点开始遍历
+	update := make([]*Node[K, V], sl.level) // 用于存储每一层的前驱节点
+	current := sl.header                    // 从头节点开始遍历
 
 	// 遍历每一层，找到删除节点的位置
 	for i := sl.level - 1; i >= 0; i-- {
 		for current.forward[i] != nil &&
-			(current.forward[i].score < node.score ||
-				(current.forward[i].score == node.score && current.forward[i].key < key)) {
+			(current.forward[i].value < node.value ||
+				(current.forward[i].value == node.value && current.forward[i].key < key)) {
 			current = current.forward[i]
 		}
 		update[i] = current
@@ -164,16 +178,16 @@ func (sl *Skiplist) Delete(key int) bool {
 	return true
 }
 
-// 获取指定key的score值
-func (sl *Skiplist) GetScore(key int) float64 {
+// GetScore 获取指定key的score值
+func (sl *Skiplist[K, V]) GetScore(key K) V {
 	if node, exists := sl.dict[key]; exists {
-		return node.score // 返回节点的score
+		return node.value // 返回节点的score
 	}
-	return 0 // 如果节点不存在，返回0
+	return Zero[V]() // 如果节点不存在，返回0
 }
 
-// 获取指定key的rank（排名）
-func (sl *Skiplist) GetRank(key int) int {
+// GetRank 获取指定key的rank（排名）
+func (sl *Skiplist[K, V]) GetRank(key K) int {
 	node, exists := sl.dict[key]
 	if !exists {
 		return 0 // 如果节点不存在，返回0
@@ -181,19 +195,38 @@ func (sl *Skiplist) GetRank(key int) int {
 
 	rank := 0
 	current := sl.header
-	score := node.score
+	value := node.value
 
 	// 遍历每一层，计算节点的排名
 	for i := sl.level - 1; i >= 0; i-- {
 		for current.forward[i] != nil &&
-			(current.forward[i].score < score ||
-				(current.forward[i].score == score && current.forward[i].key <= key)) {
+			(current.forward[i].value < value ||
+				(current.forward[i].value == value && current.forward[i].key <= key)) {
+
 			rank += current.span[i]
 			current = current.forward[i]
 		}
-		if current.key == key {
-			return rank // 找到节点并返回排名
+
+		// 如果当前节点的 forward[i] 即为目标节点，直接返回排名
+		if current.forward[i] != nil && current.forward[i].key == key {
+			rank += current.span[i] // 累加跨度
+			return rank
 		}
 	}
 	return rank
+}
+
+// Print 打印跳表的结构，展示各层的key和span
+func (sl *Skiplist[K, V]) Print() {
+	for i := sl.level - 1; i >= 0; i-- {
+		current := sl.header.forward[i] // 从该层的第一个节点开始
+		print("Level ", i, ": ")
+
+		// 遍历当前层的所有节点
+		for current != nil {
+			print("[", current.key, ",", current.span[i], "] ") // 打印key和span
+			current = current.forward[i]                        // 移动到当前层的下一个节点
+		}
+		print("\n")
+	}
 }
