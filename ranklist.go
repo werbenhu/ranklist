@@ -1,6 +1,7 @@
 package ranklist
 
 import (
+	"fmt"
 	"math/rand/v2"
 )
 
@@ -214,4 +215,23 @@ func (sl *RankList[K, V]) Rank(key K) int {
 		}
 	}
 	return rank
+}
+
+// PrintSkipList 打印整个跳表的结构
+func (sl *RankList[K, V]) Print() {
+	fmt.Printf("SkipList Level: %d, Length: %d\n", sl.level, sl.length)
+	for i := sl.level - 1; i >= 0; i-- {
+		current := sl.header
+		fmt.Printf("L%d:", i+1)
+		for current != nil {
+			if current == sl.header {
+				fmt.Printf(" ")
+			} else {
+				fmt.Printf("[%v:%v:%v] -> ", current.key, current.value, current.span[i])
+			}
+			current = current.forward[i]
+		}
+		fmt.Println("NIL")
+	}
+	fmt.Println("===================================")
 }
