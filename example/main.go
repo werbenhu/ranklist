@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/werbenhu/skiplist"
+	"github.com/werbenhu/ranklist"
 )
 
 func main() {
-	sl := skiplist.NewSkiplist[int, int]()
+	sl := ranklist.New[int, int]()
 
 	for i := 0; i < 10; i++ {
 		sl.Set(i, i)

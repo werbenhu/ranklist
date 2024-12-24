@@ -1,4 +1,4 @@
-module github.com/werbenhu/skiplist
+module github.com/werbenhu/ranklist
 
 go 1.22.1
 

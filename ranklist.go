@@ -1,4 +1,4 @@
-package skiplist
+package ranklist
 
 import (
 	"math/rand/v2"
@@ -23,7 +23,7 @@ func Zero[K Ordered]() K {
 	return zero
 }
 
-// Node Skiplist中的节点结构
+// Node RankList中的节点结构
 type Node[K Ordered, V Ordered] struct {
 	key     K             // 节点的键
 	value   V             // 节点的分数
@@ -32,8 +32,8 @@ type Node[K Ordered, V Ordered] struct {
 	level   int           // 节点的层级
 }
 
-// Skiplist Skiplist结构
-type Skiplist[K Ordered, V Ordered] struct {
+// RankList RankList结构
+type RankList[K Ordered, V Ordered] struct {
 	header *Node[K, V]       // 跳表的头节点
 	dict   map[K]*Node[K, V] // 用于存储键值对的字典，方便快速查找
 	level  int               // 当前跳表的最大层级
@@ -51,9 +51,9 @@ func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
 	}
 }
 
-// NewSkiplist 创建一个新的跳表
-func NewSkiplist[K Ordered, V Ordered]() *Skiplist[K, V] {
-	return &Skiplist[K, V]{
+// New 创建一个新的跳表
+func New[K Ordered, V Ordered]() *RankList[K, V] {
+	return &RankList[K, V]{
 		header: NewNode[K, V](Zero[K](), Zero[V](), MAXLEVEL), // 创建一个头节点
 		dict:   make(map[K]*Node[K, V]),                       // 初始化字典
 		level:  1,                                             // 初始跳表层级为1
@@ -70,7 +70,7 @@ func randomLevel() int {
 }
 
 // Insert 向跳表中插入一个新的节点
-func (sl *Skiplist[K, V]) Set(key K, value V) {
+func (sl *RankList[K, V]) Set(key K, value V) {
 	// 如果节点已经存在，先删除旧节点
 	if node, exists := sl.dict[key]; exists {
 		sl.Del(node.key)
@@ -136,7 +136,7 @@ func (sl *Skiplist[K, V]) Set(key K, value V) {
 }
 
 // Del 从跳表中删除指定的节点
-func (sl *Skiplist[K, V]) Del(key K) bool {
+func (sl *RankList[K, V]) Del(key K) bool {
 	node, exists := sl.dict[key]
 	if !exists {
 		return false // 如果节点不存在，返回false
@@ -179,7 +179,7 @@ func (sl *Skiplist[K, V]) Del(key K) bool {
 }
 
 // GetScore 获取指定key的score值
-func (sl *Skiplist[K, V]) Get(key K) V {
+func (sl *RankList[K, V]) Get(key K) V {
 	if node, exists := sl.dict[key]; exists {
 		return node.value // 返回节点的score
 	}
@@ -187,7 +187,7 @@ func (sl *Skiplist[K, V]) Get(key K) V {
 }
 
 // GetRank 获取指定key的rank（排名）
-func (sl *Skiplist[K, V]) Rank(key K) int {
+func (sl *RankList[K, V]) Rank(key K) int {
 	node, exists := sl.dict[key]
 	if !exists {
 		return 0 // 如果节点不存在，返回0
@@ -215,18 +215,3 @@ func (sl *Skiplist[K, V]) Rank(key K) int {
 	}
 	return rank
 }
-
-// // Print 打印跳表的结构，展示各层的key和span
-// func (sl *Skiplist[K, V]) Print() {
-// 	for i := sl.level - 1; i >= 0; i-- {
-// 		current := sl.header.forward[i] // 从该层的第一个节点开始
-// 		print("Level ", i, ": ")
-
-// 		// 遍历当前层的所有节点
-// 		for current != nil {
-// 			print("[", current.key, ",", current.span[i], "] ") // 打印key和span
-// 			current = current.forward[i]                        // 移动到当前层的下一个节点
-// 		}
-// 		print("\n")
-// 	}
-// }

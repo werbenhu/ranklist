@@ -1,4 +1,4 @@
-package skiplist
+package ranklist
 
 import (
 	"math/rand/v2"
