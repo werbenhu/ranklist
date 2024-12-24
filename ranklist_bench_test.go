@@ -10,7 +10,7 @@ import (
 
 // Insert keys randomly
 func BenchmarkSkipListInsertRandom(b *testing.B) {
-	list := NewSkiplist[float64, int]()
+	list := New[float64, int]()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		list.Set(rand.Float64(), i)
@@ -19,7 +19,7 @@ func BenchmarkSkipListInsertRandom(b *testing.B) {
 
 // Insert keys in sorted order
 func BenchmarkSkipListInsertSorted(b *testing.B) {
-	list := NewSkiplist[float64, int]()
+	list := New[float64, int]()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		list.Set(float64(i), i)
