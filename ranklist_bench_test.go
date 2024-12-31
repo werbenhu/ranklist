@@ -41,6 +41,18 @@ func BenchmarkRankListRank(b *testing.B) {
 	}
 }
 
+func BenchmarkRankListRange(b *testing.B) {
+	sl := New[int, int]()
+	for i := 0; i < 1000000; i++ {
+		sl.Set(i, i)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sl.Range(0, 10)
+	}
+}
+
 func BenchmarkFastSkipListSet(b *testing.B) {
 	fast := fastskiplist.New()
 	b.ResetTimer()
