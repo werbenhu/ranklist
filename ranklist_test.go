@@ -17,22 +17,11 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestSetHighProbability(t *testing.T) {
-	Probability = 0.7
+func TestSet(t *testing.T) {
 	sl := New[string, int]()
 	for k := 0; k < 10000; k++ {
 		sl.Set(strconv.Itoa(k), k)
 	}
-	Probability = 0.25
-}
-
-func TestSetLowProbability(t *testing.T) {
-	Probability = 0.05
-	sl := New[string, int]()
-	for k := 0; k < 10000; k++ {
-		sl.Set(strconv.Itoa(k), k)
-	}
-	Probability = 0.25
 }
 
 func TestSetAndGet(t *testing.T) {
@@ -203,7 +192,7 @@ func TestLength(t *testing.T) {
 	}
 }
 
-func TestRankList_Range(t *testing.T) {
+func TestRankList_Range_SimpleRange(t *testing.T) {
 	rankList := New[int, int]()
 
 	rankList.Set(1, 100)
@@ -212,67 +201,122 @@ func TestRankList_Range(t *testing.T) {
 	rankList.Set(4, 180)
 	rankList.Set(5, 200)
 
-	tests := []struct {
-		start, end int
-		expected   []Entry[int, int]
-	}{
-		{
-			start: 1,
-			end:   3,
-			expected: []Entry[int, int]{
-				{Key: 1, Value: 100},
-				{Key: 2, Value: 120},
-			},
-		},
-		// Test case: Range that includes all elements
-		{
-			start: 0,
-			end:   5,
-			expected: []Entry[int, int]{
-				{Key: 1, Value: 100},
-				{Key: 2, Value: 120},
-				{Key: 3, Value: 150},
-				{Key: 4, Value: 180},
-				{Key: 5, Value: 200},
-			},
-		},
-		// Test case: Empty range
-		{
-			start:    10,
-			end:      10,
-			expected: []Entry[int, int]{},
-		},
-		// Test case: Invalid range (start > end)
-		{
-			start:    3,
-			end:      1,
-			expected: []Entry[int, int]{},
-		},
-		// Test case: Range with an out-of-bounds end
-		{
-			start: 3,
-			end:   10,
-			expected: []Entry[int, int]{
-				{Key: 3, Value: 150},
-				{Key: 4, Value: 180},
-				{Key: 5, Value: 200},
-			},
-		},
+	start := 1
+	end := 3
+	expected := []Entry[int, int]{
+		{Key: 1, Value: 100},
+		{Key: 2, Value: 120},
 	}
 
-	for _, tt := range tests {
-		t.Run("Range Test", func(t *testing.T) {
-			result := rankList.Range(tt.start, tt.end)
-			if len(result) != len(tt.expected) {
-				t.Errorf("expected %d entries, got %d", len(tt.expected), len(result))
-			}
+	result := rankList.Range(start, end)
+	if len(result) != len(expected) {
+		t.Errorf("expected %d entries, got %d", len(expected), len(result))
+	}
 
-			for i, entry := range result {
-				if entry.Key != tt.expected[i].Key || entry.Value != tt.expected[i].Value {
-					t.Errorf("at index %d: expected (%d, %d), got (%d, %d)",
-						i, tt.expected[i].Key, tt.expected[i].Value, entry.Key, entry.Value)
-				}
-			}
-		})
+	for i, entry := range result {
+		if entry.Key != expected[i].Key || entry.Value != expected[i].Value {
+			t.Errorf("at index %d: expected (%d, %d), got (%d, %d)",
+				i, expected[i].Key, expected[i].Value, entry.Key, entry.Value)
+		}
+	}
+}
+
+func TestRankList_Range_FullRange(t *testing.T) {
+	rankList := New[int, int]()
+
+	rankList.Set(1, 100)
+	rankList.Set(2, 120)
+	rankList.Set(3, 150)
+	rankList.Set(4, 180)
+	rankList.Set(5, 200)
+
+	start := 0
+	end := 5
+	expected := []Entry[int, int]{
+		{Key: 1, Value: 100},
+		{Key: 2, Value: 120},
+		{Key: 3, Value: 150},
+		{Key: 4, Value: 180},
+		{Key: 5, Value: 200},
+	}
+
+	result := rankList.Range(start, end)
+	if len(result) != len(expected) {
+		t.Errorf("expected %d entries, got %d", len(expected), len(result))
+	}
+
+	for i, entry := range result {
+		if entry.Key != expected[i].Key || entry.Value != expected[i].Value {
+			t.Errorf("at index %d: expected (%d, %d), got (%d, %d)",
+				i, expected[i].Key, expected[i].Value, entry.Key, entry.Value)
+		}
+	}
+}
+
+func TestRankList_Range_EmptyRange(t *testing.T) {
+	rankList := New[int, int]()
+
+	rankList.Set(1, 100)
+	rankList.Set(2, 120)
+	rankList.Set(3, 150)
+	rankList.Set(4, 180)
+	rankList.Set(5, 200)
+
+	start := 10
+	end := 10
+	expected := []Entry[int, int]{}
+
+	result := rankList.Range(start, end)
+	if len(result) != len(expected) {
+		t.Errorf("expected %d entries, got %d", len(expected), len(result))
+	}
+}
+
+func TestRankList_Range_InvalidRange(t *testing.T) {
+	rankList := New[int, int]()
+
+	rankList.Set(1, 100)
+	rankList.Set(2, 120)
+	rankList.Set(3, 150)
+	rankList.Set(4, 180)
+	rankList.Set(5, 200)
+
+	start := 3
+	end := 1
+	expected := []Entry[int, int]{}
+
+	result := rankList.Range(start, end)
+	if len(result) != len(expected) {
+		t.Errorf("expected %d entries, got %d", len(expected), len(result))
+	}
+}
+
+func TestRankList_Range_OutOfBoundsEnd(t *testing.T) {
+	rankList := New[int, int]()
+
+	rankList.Set(1, 100)
+	rankList.Set(2, 120)
+	rankList.Set(3, 150)
+	rankList.Set(4, 180)
+	rankList.Set(5, 200)
+
+	start := 3
+	end := 10
+	expected := []Entry[int, int]{
+		{Key: 3, Value: 150},
+		{Key: 4, Value: 180},
+		{Key: 5, Value: 200},
+	}
+
+	result := rankList.Range(start, end)
+	if len(result) != len(expected) {
+		t.Errorf("expected %d entries, got %d", len(expected), len(result))
+	}
+
+	for i, entry := range result {
+		if entry.Key != expected[i].Key || entry.Value != expected[i].Value {
+			t.Errorf("at index %d: expected (%d, %d), got (%d, %d)",
+				i, expected[i].Key, expected[i].Value, entry.Key, entry.Value)
+		}
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-var (
+const (
 	// 跳表的最大层数。对于1000万数据量，根据公式 h = log₂(n)/2，
 	// 大约需要 log₂(10⁷)/2 ≈ 12 层。请根据实际业务需求和数据量大小适当调整该值，以优化性能和空间利用。
 	// Maximum number of levels in the skip list. For 10 million elements,
@@ -49,11 +49,11 @@ type Node[K Ordered, V Ordered] struct {
 
 	// 每一层对应的前向指针数组
 	// Array of forward pointers for each level
-	forward []*Node[K, V]
+	forward [MaxLevel]*Node[K, V]
 
 	// 每一层对应的跨度数组，记录到下一个节点的距离
 	// Array of spans for each level, recording distance to next node
-	span []int
+	span [MaxLevel]int
 
 	// 当前节点的层级
 	// Current level of the node
@@ -88,10 +88,8 @@ type RankList[K Ordered, V Ordered] struct {
 // NewNode creates a new skip list node
 func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
 	return &Node[K, V]{
-		data:    Entry[K, V]{Key: key, Value: value},
-		forward: make([]*Node[K, V], level),
-		span:    make([]int, level),
-		level:   level,
+		data:  Entry[K, V]{Key: key, Value: value},
+		level: level,
 	}
 }
 
