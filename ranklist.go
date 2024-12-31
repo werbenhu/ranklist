@@ -131,11 +131,11 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 
 	// 用于记录每层的前驱节点
 	// Records predecessor nodes at each level
-	prev := make([]*Node[K, V], MaxLevel)
+	var prev [MaxLevel]*Node[K, V]
 
 	// 用于记录每层的排名值
 	// Records rank values at each level
-	rank := make([]int, MaxLevel)
+	var rank [MaxLevel]int
 
 	curr := sl.header
 
@@ -224,7 +224,7 @@ func (sl *RankList[K, V]) del(key K) bool {
 
 	// 记录每层的前驱节点
 	// Record predecessor nodes at each level
-	prev := make([]*Node[K, V], MaxLevel)
+	var prev [MaxLevel]*Node[K, V]
 	curr := sl.header
 
 	// 查找要删除的节点
