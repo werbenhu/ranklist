@@ -25,22 +25,24 @@ A high-performance real-time ranking data structure implemented using a Skip Lis
 
 Whether for real-time ranking systems or as a high-performance key-value storage, ranklist delivers outstanding efficiency, achieving millions of writes and reads per second effortlessly.
 
-- Write Performance: Each write operation takes just 812.4 nanoseconds, handling over 1 million writes per second.
-- Read Performance: Each read operation takes only 64.03 nanoseconds, achieving 10+ million reads per second.
-- Ranking Queries: Real-time ranking queries execute in 377.4 nanoseconds, completing over 2 million query per second.
+- Write Performance: Capable of handling over a million write requests per second.
+- Read Performance: Can handle up to tens of millions of read operations per second.
+- Ranking Query: Supports real-time ranking queries, with the ability to process millions of ranking queries per second.
 
 ```
 goos: windows
 goarch: amd64
 pkg: github.com/werbenhu/ranklist
-cpu: Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz
-BenchmarkRankListSet-16          1451098               812.4 ns/op           445 B/op          5 allocs/op
-BenchmarkRankListGet-16         18473389                64.03 ns/op            0 B/op          0 allocs/op
-BenchmarkRankListRank-16         3613449               377.4 ns/op             0 B/op          0 allocs/op
-BenchmarkFastSkipListSet-16      1000000              1116 ns/op              68 B/op          2 allocs/op
-BenchmarkMapSet-16               5044543               271.7 ns/op           106 B/op          1 allocs/op
+cpu: AMD Ryzen 5 5600H with Radeon Graphics
+BenchmarkRankListSet-12          2084486               572.5 ns/op           375 B/op          5 allocs/op
+BenchmarkRankListGet-12         16147806                73.13 ns/op            0 B/op          0 allocs/op
+BenchmarkRankListRank-12         5512027               220.5 ns/op             0 B/op          0 allocs/op
+BenchmarkRankListRange-12        4931600               227.0 ns/op           496 B/op          5 allocs/op
+BenchmarkFastSkipListSet-12      1000000              1542 ns/op              68 B/op          2 allocs/op
+BenchmarkFastSkipListGet-12     12766310                90.00 ns/op            0 B/op          0 allocs/op
+BenchmarkMapSet-12               4263243               355.6 ns/op           124 B/op          1 allocs/op
 PASS
-ok      github.com/werbenhu/ranklist    17.302s
+ok      github.com/werbenhu/ranklist    19.546s
 ```
 
 ## Usage

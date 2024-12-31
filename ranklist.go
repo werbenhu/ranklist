@@ -6,13 +6,16 @@ import (
 )
 
 var (
-	// 跳表的最大层数，设置为18层
-	// Maximum number of levels in the skip list, set to 18
-	MAXLEVEL = 18
+	// 跳表的最大层数。对于1000万数据量，根据公式 h = log₂(n)/2，
+	// 大约需要 log₂(10⁷)/2 ≈ 12 层。请根据实际业务需求和数据量大小适当调整该值，以优化性能和空间利用。
+	// Maximum number of levels in the skip list. For 10 million elements,
+	// using formula h = log₂(n)/2, we need approximately log₂(10⁷)/2 ≈ 12 levels.
+	// Please adjust this value based on your actual business needs and data size to optimize performance and space utilization.
+	MaxLevel = 12
 
 	// 用于随机层级生成的概率值，设置为0.25
 	// Probability used for random level generation, set to 0.25
-	PROBABILITY = 0.25
+	Probability = 0.25
 )
 
 // Ordered 接口定义了可用作键或值的类型约束
@@ -96,19 +99,19 @@ func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
 // New creates a new skip list
 func New[K Ordered, V Ordered]() *RankList[K, V] {
 	return &RankList[K, V]{
-		header: NewNode[K, V](ZeroValue[K](), ZeroValue[V](), MAXLEVEL),
+		header: NewNode[K, V](ZeroValue[K](), ZeroValue[V](), MaxLevel),
 		dict:   make(map[K]*Node[K, V]),
 		level:  1,
 	}
 }
 
 // randomLevel 随机生成节点的层级
-// 使用概率PROBABILITY来决定是否增加层级，最高不超过MAXLEVEL
+// 使用概率Probability来决定是否增加层级，最高不超过MaxLevel
 // randomLevel generates a random level for a new node
-// Uses PROBABILITY to decide level increment, not exceeding MAXLEVEL
+// Uses Probability to decide level increment, not exceeding MaxLevel
 func randomLevel() int {
 	level := 1
-	for rand.Float64() < PROBABILITY && level < MAXLEVEL {
+	for rand.Float64() < Probability && level < MaxLevel {
 		level++
 	}
 	return level
@@ -130,11 +133,11 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 
 	// 用于记录每层的前驱节点
 	// Records predecessor nodes at each level
-	prev := make([]*Node[K, V], MAXLEVEL)
+	prev := make([]*Node[K, V], MaxLevel)
 
 	// 用于记录每层的排名值
 	// Records rank values at each level
-	rank := make([]int, MAXLEVEL)
+	rank := make([]int, MaxLevel)
 
 	curr := sl.header
 
@@ -223,7 +226,7 @@ func (sl *RankList[K, V]) del(key K) bool {
 
 	// 记录每层的前驱节点
 	// Record predecessor nodes at each level
-	prev := make([]*Node[K, V], MAXLEVEL)
+	prev := make([]*Node[K, V], MaxLevel)
 	curr := sl.header
 
 	// 查找要删除的节点

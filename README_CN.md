@@ -25,22 +25,24 @@
 
 无论是用于实时排名系统，还是单纯作为高效的 key-value 键值对存储，ranklist 都表现出卓越的性能，轻松实现每秒百万级别的写入与读取操作。
 
-- 写入性能：单次写入仅需 812.4 纳秒，每秒可处理超过百万次写入请求。
-- 读取性能：单次读取仅需 64.03 纳秒，每秒读取次数高达千万次以上。
-- 排名查询：支持实时排名查询，每次查询仅需 377.4 纳秒，每秒可完成200多万次排名查询。
+- 写入性能：每秒可处理超过百万级别写入请求。
+- 读取性能：每秒读取次数高达千万级别。
+- 排名查询：支持实时排名查询，每秒可完成百万级别排名查询。
 
 ```
 goos: windows
 goarch: amd64
 pkg: github.com/werbenhu/ranklist
-cpu: Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz
-BenchmarkRankListSet-16          1451098               812.4 ns/op           445 B/op          5 allocs/op
-BenchmarkRankListGet-16         18473389                64.03 ns/op            0 B/op          0 allocs/op
-BenchmarkRankListRank-16         3613449               377.4 ns/op             0 B/op          0 allocs/op
-BenchmarkFastSkipListSet-16      1000000              1116 ns/op              68 B/op          2 allocs/op
-BenchmarkMapSet-16               5044543               271.7 ns/op           106 B/op          1 allocs/op
+cpu: AMD Ryzen 5 5600H with Radeon Graphics
+BenchmarkRankListSet-12          2084486               572.5 ns/op           375 B/op          5 allocs/op
+BenchmarkRankListGet-12         16147806                73.13 ns/op            0 B/op          0 allocs/op
+BenchmarkRankListRank-12         5512027               220.5 ns/op             0 B/op          0 allocs/op
+BenchmarkRankListRange-12        4931600               227.0 ns/op           496 B/op          5 allocs/op
+BenchmarkFastSkipListSet-12      1000000              1542 ns/op              68 B/op          2 allocs/op
+BenchmarkFastSkipListGet-12     12766310                90.00 ns/op            0 B/op          0 allocs/op
+BenchmarkMapSet-12               4263243               355.6 ns/op           124 B/op          1 allocs/op
 PASS
-ok      github.com/werbenhu/ranklist    17.302s
+ok      github.com/werbenhu/ranklist    19.546s
 ```
 
 ## 使用示例 | Usage

@@ -18,19 +18,21 @@ func TestNew(t *testing.T) {
 }
 
 func TestSetHighProbability(t *testing.T) {
-	PROBABILITY = 0.7
+	Probability = 0.7
 	sl := New[string, int]()
 	for k := 0; k < 10000; k++ {
 		sl.Set(strconv.Itoa(k), k)
 	}
+	Probability = 0.25
 }
 
 func TestSetLowProbability(t *testing.T) {
-	PROBABILITY = 0.05
+	Probability = 0.05
 	sl := New[string, int]()
 	for k := 0; k < 10000; k++ {
 		sl.Set(strconv.Itoa(k), k)
 	}
+	Probability = 0.25
 }
 
 func TestSetAndGet(t *testing.T) {
