@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"math/rand/v2"
 	"strconv"
 
 	"github.com/werbenhu/ranklist"
@@ -10,23 +10,25 @@ import (
 func main() {
 	sl := ranklist.New[string, int]()
 
-	for i := 0; i < 5; i++ {
-		sl.Set(strconv.Itoa(i), i)
+	for i := 0; i < 20; i++ {
+		k := rand.IntN(20)
+		sl.Set(strconv.Itoa(k), k)
+		sl.Print()
 	}
 
-	sl.Print()
-	for i := 0; i < 5; i++ {
-		sl.Set(strconv.Itoa(i+10), i)
-	}
-	sl.Print()
+	// sl.Print()
+	// for i := 0; i < 3; i++ {
+	// 	sl.Set(strconv.Itoa(i+10), i)
+	// }
+	// sl.Print()
 
-	for i := 0; i < 10; i++ {
-		// k := rand.IntN(1000000)
-		k := i + 10
-		score := sl.Get(strconv.Itoa(k))
-		rank := sl.Get(strconv.Itoa(k))
-		fmt.Println(k, score, rank)
-	}
+	// for i := 0; i < 6; i++ {
+	// 	// k := rand.IntN(1000000)
+	// 	k := i + 10
+	// 	score := sl.Get(strconv.Itoa(k))
+	// 	rank := sl.Get(strconv.Itoa(k))
+	// 	fmt.Println(k, score, rank)
+	// }
 
 	// rl := ranklist.New[string, int]()
 
