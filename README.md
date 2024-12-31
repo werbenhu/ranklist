@@ -27,7 +27,7 @@ Whether for real-time ranking systems or as a high-performance key-value storage
 
 - Write Performance: Each write operation takes just 812.4 nanoseconds, handling over 1 million writes per second.
 - Read Performance: Each read operation takes only 64.03 nanoseconds, achieving 10+ million reads per second.
-- Ranking Queries: Real-time ranking queries execute in 377.4 nanoseconds, completing over 2 million calculations per second.
+- Ranking Queries: Real-time ranking queries execute in 377.4 nanoseconds, completing over 2 million query per second.
 
 ```
 goos: windows
