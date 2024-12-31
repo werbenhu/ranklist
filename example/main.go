@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"math/rand/v2"
-	"strconv"
+	"log/slog"
 
 	"github.com/werbenhu/ranklist"
 )
@@ -11,23 +9,29 @@ import (
 func main() {
 	sl := ranklist.New[string, int]()
 
-	for i := 0; i < 20; i++ {
-		k := rand.IntN(20)
-		sl.Set(strconv.Itoa(k), k)
-		// sl.Set(strconv.Itoa(i), i)
-		sl.Print()
+	// 插入有序数据
+	// Insert ordered data
+	testData := []struct {
+		key   string
+		value int
+		rank  int
+	}{
+		{"a", 1, 1},
+		{"b", 2, 2},
+		{"c", 3, 3},
+		{"d", 3, 4}, // 相同值，按键排序 Same value, sorted by key
+		// {"e", 4, 5},
 	}
 
-	for i := 0; i < 20; i++ {
-
-		r, ok := sl.Rank(strconv.Itoa(i))
-
-		if ok {
-			fmt.Printf("rank of %d: %d\n", i, r)
-		}
-
+	for _, data := range testData {
+		sl.Set(data.key, data.value)
 	}
 
-	// sl.Del(strconv.Itoa(1))
-	// sl.Print()
+	// for _, data := range testData {
+	// 	rank, exists := sl.Rank(data.key)
+	// 	slog.Info("", "key", data.key, "rank", rank, "exists", exists)
+	// }
+
+	rank, exists := sl.Rank("d")
+	slog.Info("", "key", "d", "rank", rank, "exists", exists)
 }

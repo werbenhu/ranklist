@@ -8,39 +8,46 @@ import (
 	fastskiplist "github.com/sean-public/fast-skiplist"
 )
 
-// Insert keys randomly
-func BenchmarkSkipListInsertRandom(b *testing.B) {
-	list := New[float64, int]()
+// 性能测试
+// Performance benchmark
+func BenchmarkSet(b *testing.B) {
+	sl := New[int, int]()
 	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
-		list.Set(rand.Float64(), i)
+		sl.Set(i, i)
 	}
 }
 
-// Insert keys in sorted order
-func BenchmarkSkipListInsertSorted(b *testing.B) {
-	list := New[float64, int]()
+func BenchmarkGet(b *testing.B) {
+	sl := New[int, int]()
+	for i := 0; i < 1000; i++ {
+		sl.Set(i, i)
+	}
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		list.Set(float64(i), i)
+		sl.Get(i % 1000)
 	}
 }
 
-// Insert keys randomly
-func BenchmarkFastSkipListInsertRandom(b *testing.B) {
+func BenchmarkRank(b *testing.B) {
+	sl := New[int, int]()
+	for i := 0; i < 1000; i++ {
+		sl.Set(i, i)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sl.Rank(i % 1000)
+	}
+}
+
+func BenchmarkFastSkipListSet(b *testing.B) {
 	fast := fastskiplist.New()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		fast.Set(rand.Float64(), i)
-	}
-}
-
-// Insert keys in sorted order
-func BenchmarkFastSkipListInsertSorted(b *testing.B) {
-	fast := fastskiplist.New()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		fast.Set(float64(i), i)
 	}
 }
 
