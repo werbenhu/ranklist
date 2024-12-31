@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	fastskiplist "github.com/sean-public/fast-skiplist"
+	skiplist "github.com/sean-public/fast-skiplist"
 )
 
 func BenchmarkRankListSet(b *testing.B) {
@@ -54,10 +54,22 @@ func BenchmarkRankListRange(b *testing.B) {
 }
 
 func BenchmarkFastSkipListSet(b *testing.B) {
-	fast := fastskiplist.New()
+	fast := skiplist.New()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		fast.Set(rand.Float64(), i)
+	}
+}
+
+func BenchmarkFastSkipListGet(b *testing.B) {
+	fast := skiplist.New()
+	for i := 0; i < 1000000; i++ {
+		fast.Set(float64(i), i)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		fast.Get(float64(i % 1000000))
 	}
 }
 
