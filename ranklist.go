@@ -1,6 +1,7 @@
 package ranklist
 
 import (
+	"fmt"
 	"math/rand"
 	"sync"
 )
@@ -31,16 +32,18 @@ func ZeroValue[K Ordered]() K {
 	return zero
 }
 
+// Entry  represents a key-value pair
+type Entry[K Ordered, V Ordered] struct {
+	Key   K
+	Value V
+}
+
 // Node 定义跳表节点的结构
 // Node defines the structure of a skip list node
 type Node[K Ordered, V Ordered] struct {
-	// 节点的键
-	// Key of the node
-	key K
-
-	// 节点的值
-	// Value of the node
-	value V
+	// 节点的键值对
+	// Key-value pair of the node
+	data Entry[K, V]
 
 	// 每一层对应的前向指针数组
 	// Array of forward pointers for each level
@@ -83,8 +86,7 @@ type RankList[K Ordered, V Ordered] struct {
 // NewNode creates a new skip list node
 func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
 	return &Node[K, V]{
-		key:     key,
-		value:   value,
+		data:    Entry[K, V]{Key: key, Value: value},
 		forward: make([]*Node[K, V], level),
 		span:    make([]int, level),
 		level:   level,
@@ -124,7 +126,7 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 	// 如果节点已存在，先删除旧节点
 	// If node exists, remove old node first
 	if node, exists := sl.dict[key]; exists {
-		sl.del(node.key)
+		sl.del(node.data.Key)
 	}
 
 	// 用于记录每层的前驱节点
@@ -153,8 +155,8 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 	for i := sl.level - 1; i >= 0; i-- {
 		for curr.forward[i] != nil {
 
-			if curr.forward[i].value > value ||
-				(curr.forward[i].value == value && curr.forward[i].key > key) {
+			if curr.forward[i].data.Value > value ||
+				(curr.forward[i].data.Value == value && curr.forward[i].data.Key > key) {
 				break
 			}
 			sum += curr.forward[i].span[i]
@@ -192,6 +194,14 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 	sl.length++
 }
 
+// Length 返回跳表中当前元素的数量。
+// Length returns the current number of elements in the skip list.
+func (sl *RankList[K, V]) Length() int {
+	sl.RLock()
+	defer sl.RUnlock()
+	return sl.length
+}
+
 // Del 从跳表中删除指定键的节点。
 // 如果键存在并且节点被删除，返回true；如果键不存在，返回false。
 // Del removes the node with the specified key from the skip list.
@@ -221,8 +231,8 @@ func (sl *RankList[K, V]) del(key K) bool {
 	// Find the node to be deleted
 	for i := sl.level - 1; i >= 0; i-- {
 		for curr.forward[i] != nil &&
-			(curr.forward[i].value < node.value ||
-				(curr.forward[i].value == node.value && curr.forward[i].key < key)) {
+			(curr.forward[i].data.Value < node.data.Value ||
+				(curr.forward[i].data.Value == node.data.Value && curr.forward[i].data.Key < key)) {
 			curr = curr.forward[i]
 		}
 		prev[i] = curr
@@ -259,7 +269,7 @@ func (sl *RankList[K, V]) Get(key K) (V, bool) {
 	defer sl.RUnlock()
 
 	if node, exists := sl.dict[key]; exists {
-		return node.value, true
+		return node.data.Value, true
 	}
 	return ZeroValue[V](), false
 }
@@ -285,13 +295,13 @@ func (sl *RankList[K, V]) Rank(key K) (int, bool) {
 	for i := sl.level - 1; i >= 0; i-- {
 		for curr.forward[i] != nil {
 
-			if curr.forward[i].value == node.value && curr.forward[i].key == key {
+			if curr.forward[i].data.Value == node.data.Value && curr.forward[i].data.Key == key {
 				rank += curr.forward[i].span[i]
 				return rank, true
 			}
 
-			if curr.forward[i].value > node.value ||
-				(curr.forward[i].value == node.value && curr.forward[i].key > key) {
+			if curr.forward[i].data.Value > node.data.Value ||
+				(curr.forward[i].data.Value == node.data.Value && curr.forward[i].data.Key > key) {
 				break
 			}
 
@@ -300,4 +310,52 @@ func (sl *RankList[K, V]) Rank(key K) (int, bool) {
 		}
 	}
 	return 0, false
+}
+
+// Range 获取指定排名区间内的榜单项（不包含END）
+// 返回指定范围内的条目列表。
+// Range retrieves the entries within the specified rank range (excluding END)
+// Returns a list of entries within the specified range.
+func (sl *RankList[K, V]) Range(start int, end int) []Entry[K, V] {
+	sl.RLock()
+	defer sl.RUnlock()
+
+	rank := 0
+	curr := sl.header
+	entries := make([]Entry[K, V], 0)
+
+	for i := sl.level - 1; i >= 0; i-- {
+		for curr.forward[i] != nil {
+			rank += curr.forward[i].span[i]
+			if rank >= start {
+				break
+			}
+			curr = curr.forward[i]
+		}
+	}
+
+	total := 0
+	for curr.forward[0] != nil && start+total < end {
+		entries = append(entries, curr.forward[0].data)
+		curr = curr.forward[0]
+		total++
+	}
+	return entries
+}
+
+// Print 打印跳表结构
+func (sl *RankList[K, V]) Print() {
+	fmt.Printf("SkipList Level: %d, Length: %d\n", sl.level, sl.length)
+	for i := sl.level - 1; i >= 0; i-- {
+		curr := sl.header
+		fmt.Printf("L%d -> ", i+1)
+		for curr != nil {
+			if curr != sl.header {
+				fmt.Printf("[%v:%v:%v] -> ", curr.data.Key, curr.data.Value, curr.span[i])
+			}
+			curr = curr.forward[i]
+		}
+		fmt.Println("NIL")
+	}
+	fmt.Println("===================================")
 }

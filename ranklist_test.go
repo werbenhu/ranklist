@@ -188,3 +188,89 @@ func TestEdgeCases(t *testing.T) {
 		t.Errorf("Length should be 0 after all deletions, got %d", sl.length)
 	}
 }
+
+func TestLength(t *testing.T) {
+	sl := New[int, int]()
+
+	for i := 0; i < 1000; i++ {
+		sl.Set(i, i)
+	}
+
+	if sl.Length() != 1000 {
+		t.Errorf("Length should be 1000 after insertions, got %d", sl.length)
+	}
+}
+
+func TestRankList_Range(t *testing.T) {
+	rankList := New[int, int]()
+
+	rankList.Set(1, 100)
+	rankList.Set(2, 200)
+	rankList.Set(3, 150)
+	rankList.Set(4, 120)
+	rankList.Set(5, 180)
+
+	tests := []struct {
+		start, end int
+		expected   []Entry[int, int]
+	}{
+		{
+			start: 1,
+			end:   3,
+			expected: []Entry[int, int]{
+				{Key: 1, Value: 100},
+				{Key: 4, Value: 120},
+			},
+		},
+		// Test case: Range that includes all elements
+		{
+			start: 0,
+			end:   5,
+			expected: []Entry[int, int]{
+				{Key: 1, Value: 100},
+				{Key: 4, Value: 120},
+				{Key: 3, Value: 150},
+				{Key: 5, Value: 180},
+				{Key: 2, Value: 200},
+			},
+		},
+		// Test case: Empty range
+		{
+			start:    10,
+			end:      10,
+			expected: []Entry[int, int]{},
+		},
+		// Test case: Invalid range (start > end)
+		{
+			start:    3,
+			end:      1,
+			expected: []Entry[int, int]{},
+		},
+		// Test case: Range with an out-of-bounds end
+		{
+			start: 3,
+			end:   10,
+			expected: []Entry[int, int]{
+				{Key: 3, Value: 150},
+				{Key: 5, Value: 180},
+				{Key: 2, Value: 200},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run("Range Test", func(t *testing.T) {
+			result := rankList.Range(tt.start, tt.end)
+			if len(result) != len(tt.expected) {
+				t.Errorf("expected %d entries, got %d", len(tt.expected), len(result))
+			}
+
+			for i, entry := range result {
+				if entry.Key != tt.expected[i].Key || entry.Value != tt.expected[i].Value {
+					t.Errorf("at index %d: expected (%d, %d), got (%d, %d)",
+						i, tt.expected[i].Key, tt.expected[i].Value, entry.Key, entry.Value)
+				}
+			}
+		})
+	}
+}
