@@ -207,10 +207,10 @@ func TestRankList_Range(t *testing.T) {
 	rankList := New[int, int]()
 
 	rankList.Set(1, 100)
-	rankList.Set(2, 200)
+	rankList.Set(2, 120)
 	rankList.Set(3, 150)
-	rankList.Set(4, 120)
-	rankList.Set(5, 180)
+	rankList.Set(4, 180)
+	rankList.Set(5, 200)
 
 	tests := []struct {
 		start, end int
@@ -221,7 +221,7 @@ func TestRankList_Range(t *testing.T) {
 			end:   3,
 			expected: []Entry[int, int]{
 				{Key: 1, Value: 100},
-				{Key: 4, Value: 120},
+				{Key: 2, Value: 120},
 			},
 		},
 		// Test case: Range that includes all elements
@@ -230,10 +230,10 @@ func TestRankList_Range(t *testing.T) {
 			end:   5,
 			expected: []Entry[int, int]{
 				{Key: 1, Value: 100},
-				{Key: 4, Value: 120},
+				{Key: 2, Value: 120},
 				{Key: 3, Value: 150},
-				{Key: 5, Value: 180},
-				{Key: 2, Value: 200},
+				{Key: 4, Value: 180},
+				{Key: 5, Value: 200},
 			},
 		},
 		// Test case: Empty range
@@ -254,8 +254,8 @@ func TestRankList_Range(t *testing.T) {
 			end:   10,
 			expected: []Entry[int, int]{
 				{Key: 3, Value: 150},
-				{Key: 5, Value: 180},
-				{Key: 2, Value: 200},
+				{Key: 4, Value: 180},
+				{Key: 5, Value: 200},
 			},
 		},
 	}

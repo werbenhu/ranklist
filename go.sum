@@ -1,2 +1,4 @@
+github.com/liyiheng/zset v0.2.1 h1:Y0RnT5QvyPDLEG/kH5xPwBxefDSA6x7SXqL6bTpaIg4=
+github.com/liyiheng/zset v0.2.1/go.mod h1:7eAp64yqwQ5hgj7L6xBdpI3tX2Im8zmRXtpQ5svNSVA=
 github.com/sean-public/fast-skiplist v0.0.0-20200308194023-d7f7945b944e h1:w2+6sbUoNbKRno+Gb09RWXezAw0m7kzFI1ickiuVLl4=
 github.com/sean-public/fast-skiplist v0.0.0-20200308194023-d7f7945b944e/go.mod h1:sF4pw7fVg/E9T7KYqdJtxcQQnQMef8E2kgZScnDKHTE=

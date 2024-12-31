@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/liyiheng/zset"
 	skiplist "github.com/sean-public/fast-skiplist"
 )
 
@@ -14,6 +15,15 @@ func BenchmarkRankListSet(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		sl.Set(i, i)
+	}
+}
+
+func BenchmarkRankListRandSet(b *testing.B) {
+	sl := New[int, int]()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		sl.Set(i, rand.Int())
 	}
 }
 
@@ -53,7 +63,24 @@ func BenchmarkRankListRange(b *testing.B) {
 	}
 }
 
+func BenchmarkZSetRandSet(b *testing.B) {
+	s := zset.New[int64]()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		s.Set(rand.Float64(), int64(i))
+	}
+}
+
 func BenchmarkFastSkipListSet(b *testing.B) {
+	fast := skiplist.New()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		fast.Set(float64(i), i)
+	}
+}
+
+func BenchmarkFastSkipListRandSet(b *testing.B) {
 	fast := skiplist.New()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
