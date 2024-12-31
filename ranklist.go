@@ -1,7 +1,6 @@
 package ranklist
 
 import (
-	"fmt"
 	"math/rand"
 	"sync"
 )
@@ -343,19 +342,19 @@ func (sl *RankList[K, V]) Range(start int, end int) []Entry[K, V] {
 	return entries
 }
 
-// Print 打印跳表结构
-func (sl *RankList[K, V]) Print() {
-	fmt.Printf("SkipList Level: %d, Length: %d\n", sl.level, sl.length)
-	for i := sl.level - 1; i >= 0; i-- {
-		curr := sl.header
-		fmt.Printf("L%d -> ", i+1)
-		for curr != nil {
-			if curr != sl.header {
-				fmt.Printf("[%v:%v:%v] -> ", curr.data.Key, curr.data.Value, curr.span[i])
-			}
-			curr = curr.forward[i]
-		}
-		fmt.Println("NIL")
-	}
-	fmt.Println("===================================")
-}
+// Print for test
+// func (sl *RankList[K, V]) Print() {
+// 	fmt.Printf("SkipList Level: %d, Length: %d\n", sl.level, sl.length)
+// 	for i := sl.level - 1; i >= 0; i-- {
+// 		curr := sl.header
+// 		fmt.Printf("L%d -> ", i+1)
+// 		for curr != nil {
+// 			if curr != sl.header {
+// 				fmt.Printf("[%v:%v:%v] -> ", curr.data.Key, curr.data.Value, curr.span[i])
+// 			}
+// 			curr = curr.forward[i]
+// 		}
+// 		fmt.Println("NIL")
+// 	}
+// 	fmt.Println("===================================")
+// }
