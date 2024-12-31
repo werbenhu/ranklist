@@ -10,7 +10,7 @@
 
 # ranklist
 
-A High-Performance Leaderboard Data Structure Based on Skip List
+A high-performance ranking system implementation based on Skip List.
 
 ## Features
 
