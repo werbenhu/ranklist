@@ -10,7 +10,7 @@
 
 # ranklist
 
-一个基于跳表(Skip List)实现的高性能排行榜数据结构。
+一个基于golang跳表(Skip List)实现的高性能实时排名数据结构。
 
 ## 特性 | Features
 

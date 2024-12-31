@@ -10,7 +10,7 @@
 
 # ranklist
 
-A high-performance ranking system implementation based on Skip List.
+A high-performance real-time ranking data structure implemented using a Skip List in Golang.
 
 ## Features
 
