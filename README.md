@@ -49,30 +49,48 @@ ok      github.com/werbenhu/ranklist    17.302s
 package main
 
 import (
-    "fmt"
+	"fmt"
 
-    "github.com/werbenhu/ranklist"
+	"github.com/werbenhu/ranklist"
 )
 
 func main() {
-    r := ranklist.New[string, int]()
+	// Create a new rank list where keys are strings and scores are integers.
+	// The rank list uses a skip list internally for efficient ranking operations.
+	r := ranklist.New[string, int]()
 
-    r.Set("a", 1)
-    r.Set("b", 2)
-    r.Set("c", 3)
-    r.Set("d", 4)
-    r.Set("e", 5)
+	// Add elements to the rank list with their respective scores.
+	// Keys "a", "b", "c", "d", and "e" are assigned scores 1, 2, 3, 4, and 5, respectively.
+	r.Set("a", 1)
+	r.Set("b", 2)
+	r.Set("c", 3)
+	r.Set("d", 4)
+	r.Set("e", 5)
 
-    if ok := r.Del("e"); ok {
-        fmt.Printf("Successfully deleted 'e'\n")
-    }
+	// Delete the key "e" from the rank list.
+	// The Del method returns true if the key existed and was successfully removed.
+	if ok := r.Del("e"); ok {
+		fmt.Printf("Successfully deleted 'e'\n")
+	}
 
-    if rank, ok := r.Rank("c"); ok {
-        fmt.Printf("The rank of 'c' is: %d\n", rank)
-    }
+	// Get the rank of the key "c".
+	// The Rank method returns the rank of the key (1-based) and a boolean indicating success.
+	if rank, ok := r.Rank("c"); ok {
+		fmt.Printf("The rank of 'c' is: %d\n", rank)
+	}
 
-    if score, ok := r.Get("d"); ok {
-        fmt.Printf("The score of 'd' is: %d\n", score)
-    }
+	// Get the score associated with the key "d".
+	// The Get method returns the score and a boolean indicating success.
+	if score, ok := r.Get("d"); ok {
+		fmt.Printf("The score of 'd' is: %d\n", score)
+	}
+
+	// Retrieve the top 3 keys and their scores from the rank list.
+	ranks := r.Range(1, 4)
+	startRank := 1
+	for k := range ranks {
+		fmt.Printf("Key: %s, Score: %d, Rank: %d\n", ranks[k].Key, ranks[k].Value, startRank)
+		startRank++
+	}
 }
 ```

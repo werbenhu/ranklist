@@ -55,24 +55,42 @@ import (
 )
 
 func main() {
+	// 创建一个新的排行榜，键为字符串，分数为整数。
+	// 排行榜内部使用跳表实现，以提高排名操作的效率。
 	r := ranklist.New[string, int]()
 
+	// 向排行榜中添加元素及其对应的分数。
+	// 键 "a"、"b"、"c"、"d" 和 "e" 分别对应分数 1、2、3、4 和 5。
 	r.Set("a", 1)
 	r.Set("b", 2)
 	r.Set("c", 3)
 	r.Set("d", 4)
 	r.Set("e", 5)
 
+	// 从排行榜中删除键 "e"。
+	// 如果键存在且删除成功，Del 方法返回 true。
 	if ok := r.Del("e"); ok {
-		fmt.Printf("Successfully deleted 'e'\n")
+		fmt.Printf("成功删除 'e'\n")
 	}
 
+	// 获取键 "c" 的排名。
+	// Rank 方法返回键的排名（从 1 开始）以及一个表示操作成功的布尔值。
 	if rank, ok := r.Rank("c"); ok {
-		fmt.Printf("The rank of 'c' is: %d\n", rank)
+		fmt.Printf("'c' 的排名是: %d\n", rank)
 	}
 
+	// 获取键 "d" 的分数。
+	// Get 方法返回分数以及一个表示操作成功的布尔值。
 	if score, ok := r.Get("d"); ok {
-		fmt.Printf("The score of 'd' is: %d\n", score)
+		fmt.Printf("'d' 的分数是: %d\n", score)
+	}
+
+	// 获取排行榜前 3 名的键及其分数。
+	ranks := r.Range(1, 4)
+	startRank := 1
+	for k, v := range ranks {
+		fmt.Printf("键: %s, 分数: %d, 排名: %d\n", ranks[k].Key, ranks[k].Value, startRank)
+		startRank++
 	}
 }
 ```
