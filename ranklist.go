@@ -326,10 +326,11 @@ func (sl *RankList[K, V]) Range(start int, end int) []Entry[K, V] {
 
 	for i := sl.level - 1; i >= 0; i-- {
 		for curr.forward[i] != nil {
-			rank += curr.forward[i].span[i]
-			if rank >= start {
+			forwardRank := rank + curr.forward[i].span[i]
+			if forwardRank >= start {
 				break
 			}
+			rank = forwardRank
 			curr = curr.forward[i]
 		}
 	}
