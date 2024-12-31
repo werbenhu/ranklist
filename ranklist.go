@@ -81,36 +81,36 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 	rank := make([]int, MAXLEVEL)         // 用于记录每一层的rank值
 	curr := sl.header                     // 从头节点开始遍历
 
-	sum := 0 // 累计的span数量
-	// 遍历每一层
-	for i := sl.level - 1; i >= 0; i-- {
-
-		// 寻找合适的位置
-		for curr.forward[i] != nil &&
-			(curr.forward[i].value < value || // 按照score升序排列
-				(curr.forward[i].value == value && curr.forward[i].key < key)) {
-
-			fmt.Printf("value:%v, i: %v, span:%v\n", value, i, curr.span[i])
-			// 如果score相同，则按照key升序排列
-			sum += curr.span[i] // rank是前驱节点的排名值
-			curr = curr.forward[i]
-		}
-		rank[i] = sum
-		prev[i] = curr
-	}
-
 	// 随机生成节点的层级
 	level := randomLevel()
 	if level > sl.level {
 		// 如果生成的层级大于当前跳表的层级，需要增加跳表的层级
 		for i := sl.level; i < level; i++ {
 			prev[i] = sl.header
-			sl.header.span[i] = sl.length
 		}
 		sl.level = level
 	}
 
-	fmt.Printf("value:%v, rank: %v\n", value, rank)
+	sum := 0 // 累计的span数量
+	// 遍历每一层
+	for i := sl.level - 1; i >= 0; i-- {
+
+		// 寻找合适的位置，如果value相等，后来的在后面
+		for curr.forward[i] != nil {
+			if curr.forward[i].value > value {
+				break
+			}
+			if curr.forward[i].value == value && curr.forward[i].key > key {
+				break
+			}
+
+			// 如果score相同，则按照key升序排列
+			sum += curr.forward[i].span[i] // rank是前驱节点的排名值
+			curr = curr.forward[i]
+		}
+		rank[i] = sum
+		prev[i] = curr
+	}
 
 	// 创建新节点
 	newNode := NewNode[K, V](key, value, level)
@@ -127,12 +127,18 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 		} else {
 			// 当前节点的span是第0层前驱节点的排名值，减去当前层前驱节点的排名 + 1
 			newNode.span[i] = rank[0] - rank[i] + 1
-			fmt.Printf("newNode.span[%d]: %d, rank[%d]: %d, rank[%d]: %d\n", i, newNode.span[i], i-1, rank[i-1], i, rank[i])
 
 			// 下一个节点的被新节点切割了，要重现计算下一个节点的span
 			if newNode.forward[i] != nil {
-				newNode.forward[i].span[i] = rank[i] - rank[i-1]
+				newNode.forward[i].span[i] = newNode.span[i] + 1
 			}
+		}
+	}
+
+	// 插入节点上面还有层级，上面层级当前节点后面的节点的span都要+1
+	for i := level; i < sl.level; i++ {
+		if prev[i].forward[i] != nil {
+			prev[i].forward[i].span[i]++
 		}
 	}
 
@@ -147,25 +153,29 @@ func (sl *RankList[K, V]) Del(key K) bool {
 		return false // 如果节点不存在，返回false
 	}
 
-	prev := make([]*Node[K, V], sl.level) // 用于存储每一层的前驱节点
-	current := sl.header                  // 从头节点开始遍历
+	prev := make([]*Node[K, V], MAXLEVEL) // 用于存储每一层的前驱节点
+	curr := sl.header                     // 从头节点开始遍历
 
 	// 遍历每一层，找到删除节点的位置
 	for i := sl.level - 1; i >= 0; i-- {
-		for current.forward[i] != nil &&
-			(current.forward[i].value < node.value ||
-				(current.forward[i].value == node.value && current.forward[i].key < key)) {
-			current = current.forward[i]
+		for curr.forward[i] != nil {
+			if curr.forward[i].value == node.value && curr.forward[i].key >= key {
+				break
+			}
+			if curr.forward[i].value > node.value {
+				break
+			}
+			curr = curr.forward[i]
 		}
-		prev[i] = current
+		prev[i] = curr
 	}
 
 	// 删除节点
 	for i := 0; i < sl.level; i++ {
 		if prev[i].forward[i] != nil && prev[i].forward[i].key == key {
-			prev[i].span[i] += prev[i].forward[i].span[i] - 1
 			prev[i].forward[i] = prev[i].forward[i].forward[i]
 		}
+		prev[i].forward[i].span[i]--
 	}
 
 	// 如果最上层没有节点，降低跳表的层级
