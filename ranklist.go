@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-const (
+var (
 	// 跳表的最大层数，设置为18层
 	// Maximum number of levels in the skip list, set to 18
 	MAXLEVEL = 18
@@ -16,9 +16,7 @@ const (
 )
 
 // Ordered 接口定义了可用作键或值的类型约束
-// ~符号表示包含所有以这些基本类型为底层类型的用户定义类型
 // Ordered interface defines type constraints for keys and values
-// The ~ symbol includes all user-defined types with these base types
 type Ordered interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
 		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
@@ -27,18 +25,14 @@ type Ordered interface {
 }
 
 // ZeroValue 返回指定类型的零值
-// 这在需要返回默认值的场景中很有用
 // Zero returns the zero value for the specified type
-// This is useful in scenarios where a default value needs to be returned
 func ZeroValue[K Ordered]() K {
 	var zero K
 	return zero
 }
 
 // Node 定义跳表节点的结构
-// 包含键值对、前向指针数组、跨度数组和节点层级信息
 // Node defines the structure of a skip list node
-// Contains key-value pair, forward pointers array, span array, and node level
 type Node[K Ordered, V Ordered] struct {
 	// 节点的键
 	// Key of the node
@@ -86,9 +80,7 @@ type RankList[K Ordered, V Ordered] struct {
 }
 
 // NewNode 创建一个新的跳表节点
-// 初始化节点的键、值、前向指针数组和跨度数组
 // NewNode creates a new skip list node
-// Initializes node's key, value, forward pointer array and span array
 func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
 	return &Node[K, V]{
 		key:     key,
@@ -100,9 +92,7 @@ func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
 }
 
 // New 创建一个新的跳表
-// 初始化头节点和键值对字典
 // New creates a new skip list
-// Initializes header node and key-value dictionary
 func New[K Ordered, V Ordered]() *RankList[K, V] {
 	return &RankList[K, V]{
 		header: NewNode[K, V](ZeroValue[K](), ZeroValue[V](), MAXLEVEL),
@@ -123,9 +113,9 @@ func randomLevel() int {
 	return level
 }
 
-// Set 向跳表中插入或更新节点
+// Set 向跳表中插入数据
 // 如果键已存在，则先删除旧节点再插入新节点
-// Set inserts or updates a node in the skip list
+// Set inserts or updates a key-value pair
 // If the key exists, removes the old node before inserting the new one
 func (sl *RankList[K, V]) Set(key K, value V) {
 	sl.Lock()
@@ -202,18 +192,20 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 	sl.length++
 }
 
-// Del 从跳表中删除指定键的节点
-// 返回key是否存在
-// Del removes a node with the specified key from the skip list
-// Returns whether the deletion was successful
+// Del 从跳表中删除指定键的节点。
+// 如果键存在并且节点被删除，返回true；如果键不存在，返回false。
+// Del removes the node with the specified key from the skip list.
+// Returns true if the key exists and the node is deleted, false if the key does not exist.
 func (sl *RankList[K, V]) Del(key K) bool {
 	sl.Lock()
 	defer sl.Unlock()
 	return sl.del(key)
 }
 
+// 删除操作实际执行跳表节点的删除。
+// 它搜索指定的节点，更新前向指针，并相应地调整跨度值。
 // del performs the actual deletion of a node from the skip list.
-// It searches for the node and updates the forward pointers and spans accordingly.
+// It searches for the node, updates the forward pointers, and adjusts the span values accordingly.
 func (sl *RankList[K, V]) del(key K) bool {
 	node, exists := sl.dict[key]
 	if !exists {
@@ -259,9 +251,9 @@ func (sl *RankList[K, V]) del(key K) bool {
 }
 
 // Get 根据键获取节点的值
-// 返回值和是否存在的标志
+// 如果键存在并且节点被删除，返回true；如果键不存在，返回false。
 // Get retrieves the value associated with the key
-// Returns the value and whether it exists
+// Returns true if the key exists and the node is deleted, false if the key does not exist.
 func (sl *RankList[K, V]) Get(key K) (V, bool) {
 	sl.RLock()
 	defer sl.RUnlock()
@@ -273,9 +265,9 @@ func (sl *RankList[K, V]) Get(key K) (V, bool) {
 }
 
 // Rank 获取节点的排名
-// 返回排名和是否存在的标志
+// 如果键存在并且节点被删除，返回true；如果键不存在，返回false。
 // Rank gets the rank of a node
-// Returns the rank and whether the node exists
+// Returns true if the key exists and the node is deleted, false if the key does not exist.
 func (sl *RankList[K, V]) Rank(key K) (int, bool) {
 	sl.RLock()
 	defer sl.RUnlock()
@@ -309,23 +301,3 @@ func (sl *RankList[K, V]) Rank(key K) (int, bool) {
 	}
 	return 0, false
 }
-
-// Print 打印跳表的结构
-// 用于调试和可视化跳表
-// Print prints the structure of the skip list
-// Used for debugging and visualization
-// func (sl *RankList[K, V]) Print() {
-// 	fmt.Printf("SkipList Level: %d, Length: %d\n", sl.level, sl.length)
-// 	for i := sl.level - 1; i >= 0; i-- {
-// 		current := sl.header
-// 		fmt.Printf("L%d -> ", i+1)
-// 		for current != nil {
-// 			if current != sl.header {
-// 				fmt.Printf("[%v:%v:%v] -> ", current.key, current.value, current.span[i])
-// 			}
-// 			current = current.forward[i]
-// 		}
-// 		fmt.Println("NIL")
-// 	}
-// 	fmt.Println("===================================")
-// }

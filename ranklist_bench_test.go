@@ -8,9 +8,7 @@ import (
 	fastskiplist "github.com/sean-public/fast-skiplist"
 )
 
-// 性能测试
-// Performance benchmark
-func BenchmarkSet(b *testing.B) {
+func BenchmarkRankListSet(b *testing.B) {
 	sl := New[int, int]()
 	b.ResetTimer()
 
@@ -19,27 +17,27 @@ func BenchmarkSet(b *testing.B) {
 	}
 }
 
-func BenchmarkGet(b *testing.B) {
+func BenchmarkRankListGet(b *testing.B) {
 	sl := New[int, int]()
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 1000000; i++ {
 		sl.Set(i, i)
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sl.Get(i % 1000)
+		sl.Get(i % 1000000)
 	}
 }
 
-func BenchmarkRank(b *testing.B) {
+func BenchmarkRankListRank(b *testing.B) {
 	sl := New[int, int]()
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 1000000; i++ {
 		sl.Set(i, i)
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sl.Rank(i % 1000)
+		sl.Rank(i % 1000000)
 	}
 }
 

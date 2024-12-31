@@ -10,24 +10,24 @@
 
 # ranklist
 
-A High-Performance Leaderboard Data Structure Based on Skip List
+一个基于跳表(Skip List)实现的高性能排行榜数据结构。
 
-## Features
+## 特性 | Features
 
-- Thread-Safe Operations: Provides safe concurrent access.
-- Generic Support: Works seamlessly with various comparable data types.
-- O(log n) Time Complexity: Efficient insertion, deletion, and query operations.
-- Real-Time Ranking Queries: Optimized for fast ranking updates.
-- Secondary Sorting: Supports tie-breaking for equal scores.
-- Built-In Key-Value Dictionary: Enables O(1) key-value lookups.
+- 线程安全的操作接口
+- 支持泛型，可用于各种可比较的数据类型
+- O(log n) 的时间复杂度用于插入、删除和查询操作
+- 支持快速的实时排名查询
+- 支持相同分数下的二级排序
+- 内置键值对字典，提供 O(1) 的键值查找
 
-### Exceptional Performance
+### 极致性能表现
 
-Whether for real-time ranking systems or as a high-performance key-value storage, ranklist delivers outstanding efficiency, achieving millions of writes and reads per second effortlessly.
+无论是用于实时排名系统，还是单纯作为高效的 key-value 键值对存储，ranklist 都表现出卓越的性能，轻松实现每秒百万级别的写入与读取操作。
 
-- Write Performance: Each write operation takes just 812.4 nanoseconds, handling over 1 million writes per second.
-- Read Performance: Each read operation takes only 64.03 nanoseconds, achieving 10+ million reads per second.
-- Ranking Queries: Real-time ranking queries execute in 377.4 nanoseconds, completing over 2 million calculations per second.
+- 写入性能：单次写入仅需 812.4 纳秒，每秒可处理超过百万次写入请求。
+- 读取性能：单次读取仅需 64.03 纳秒，每秒读取次数高达千万次以上。
+- 排名查询：支持实时排名查询，每次查询仅需 377.4 纳秒，每秒可完成200多万次排名计算。
 
 ```
 goos: windows
@@ -43,36 +43,36 @@ PASS
 ok      github.com/werbenhu/ranklist    17.302s
 ```
 
-## Usage
+## 使用示例 | Usage
 
 ```go
 package main
 
 import (
-    "fmt"
+	"fmt"
 
-    "github.com/werbenhu/ranklist"
+	"github.com/werbenhu/ranklist"
 )
 
 func main() {
-    r := ranklist.New[string, int]()
+	r := ranklist.New[string, int]()
 
-    r.Set("a", 1)
-    r.Set("b", 2)
-    r.Set("c", 3)
-    r.Set("d", 4)
-    r.Set("e", 5)
+	r.Set("a", 1)
+	r.Set("b", 2)
+	r.Set("c", 3)
+	r.Set("d", 4)
+	r.Set("e", 5)
 
-    if ok := r.Del("e"); ok {
-        fmt.Printf("Successfully deleted 'e'\n")
-    }
+	if ok := r.Del("e"); ok {
+		fmt.Printf("Successfully deleted 'e'\n")
+	}
 
-    if rank, ok := r.Rank("c"); ok {
-        fmt.Printf("The rank of 'c' is: %d\n", rank)
-    }
+	if rank, ok := r.Rank("c"); ok {
+		fmt.Printf("The rank of 'c' is: %d\n", rank)
+	}
 
-    if score, ok := r.Get("d"); ok {
-        fmt.Printf("The score of 'd' is: %d\n", score)
-    }
+	if score, ok := r.Get("d"); ok {
+		fmt.Printf("The score of 'd' is: %d\n", score)
+	}
 }
 ```
