@@ -33,19 +33,19 @@ Whether for real-time ranking systems or as a high-performance key-value storage
 goos: windows
 goarch: amd64
 pkg: github.com/werbenhu/ranklist
-cpu: AMD Ryzen 5 5600H with Radeon Graphics
-BenchmarkRankListSet-12                  2691972               407.6 ns/op           288 B/op          1 allocs/op
-BenchmarkRankListRandSet-12              1000000              1593 ns/op             309 B/op          1 allocs/op
-BenchmarkRankListGet-12                 14354341                83.24 ns/op            0 B/op          0 allocs/op
-BenchmarkRankListRank-12                 6383806               191.0 ns/op             0 B/op          0 allocs/op
-BenchmarkRankListRange-12                6502486               185.7 ns/op           496 B/op          5 allocs/op
-BenchmarkZSetRandSet-12                  1000000              2901 ns/op             167 B/op          3 allocs/op
-BenchmarkFastSkipListSet-12              6548966               191.5 ns/op            68 B/op          2 allocs/op
-BenchmarkFastSkipListRandSet-12          1000000              1321 ns/op              68 B/op          2 allocs/op
-BenchmarkFastSkipListGet-12             13239830                90.82 ns/op            0 B/op          0 allocs/op
-BenchmarkMapSet-12                       4489778               328.8 ns/op           118 B/op          1 allocs/op
+cpu: Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz
+BenchmarkRankListSet-16                  2727870               395.9 ns/op           287 B/op          1 allocs/op
+BenchmarkRankListRandSet-16              1000000              1302 ns/op             309 B/op          1 allocs/op
+BenchmarkRankListGet-16                 13643929                89.96 ns/op            0 B/op          0 allocs/op
+BenchmarkRankListRank-16                 6583689               172.7 ns/op             0 B/op          0 allocs/op
+BenchmarkRankListRange-16                5898511               208.7 ns/op           496 B/op          5 allocs/op
+BenchmarkZSetRandSet-16                  1000000              2260 ns/op             167 B/op          3 allocs/op
+BenchmarkFastSkipListSet-16              5679913               222.4 ns/op            68 B/op          2 allocs/op
+BenchmarkFastSkipListRandSet-16          1000000              1118 ns/op              68 B/op          2 allocs/op
+BenchmarkFastSkipListGet-16             10505304               114.4 ns/op             0 B/op          0 allocs/op
+BenchmarkMapSet-16                       5130590               277.2 ns/op           104 B/op          1 allocs/op
 PASS
-ok      github.com/werbenhu/ranklist    23.779s
+ok      github.com/werbenhu/ranklist    22.892s
 ```
 
 ## Usage
