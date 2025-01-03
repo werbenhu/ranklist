@@ -99,6 +99,7 @@ func TestRank(t *testing.T) {
 		{"c", 3, 3},
 		{"d", 3, 4},
 		{"e", 4, 5},
+		{"f", 5, 6},
 	}
 
 	for _, data := range testData {
@@ -121,6 +122,42 @@ func TestRank(t *testing.T) {
 	}
 	if rank != 0 {
 		t.Errorf("Rank should be 0 for non-existent key, got %d", rank)
+	}
+}
+
+func TestRankAfterDel(t *testing.T) {
+	sl := New[string, int]()
+
+	testData := []struct {
+		key   string
+		value int
+		rank  int
+	}{
+		{"a", 1, 1},
+		{"b", 2, 2},
+		{"d", 3, 3},
+		{"e", 4, 4},
+		{"g", 6, 5},
+		{"h", 7, 6},
+	}
+
+	for _, data := range testData {
+		sl.Set(data.key, data.value)
+	}
+
+	sl.Set("c", 3)
+	sl.Del("c")
+	sl.Set("f", 5)
+	sl.Del("f")
+
+	for _, data := range testData {
+		rank, exists := sl.Rank(data.key)
+		if !exists {
+			t.Fatalf("Key %s should exist", data.key)
+		}
+		if rank != data.rank {
+			t.Errorf("Key %s: expected rank %d, got %d", data.key, data.rank, rank)
+		}
 	}
 }
 

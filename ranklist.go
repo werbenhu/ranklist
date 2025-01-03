@@ -179,7 +179,8 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 		} else {
 			newNode.span[i] = rank[0] - rank[i] + 1
 			if newNode.forward[i] != nil {
-				newNode.forward[i].span[i] = newNode.span[i] + 1
+				// 后面节点的span，被插入的节点切割了
+				newNode.forward[i].span[i] = newNode.forward[i].span[i] - newNode.span[i] + 1
 			}
 		}
 	}
@@ -242,11 +243,20 @@ func (sl *RankList[K, V]) del(key K) bool {
 	// Update forward pointers and spans
 	for i := 0; i < sl.level; i++ {
 		curr = prev[i].forward[i]
+
 		if curr != nil && curr.data.Key == key && curr.data.Value == value {
-			next := curr.forward[i]
-			if next != nil {
-				next.span[i] += curr.span[i] - 1
+			// 如果这一层找到了删除的节点，那么将删除节点清除，并将删除节点的 span 甩给后面的节点
+			// If the node to be deleted is found at this level, remove the node and pass its span to the next node
+			prev[i].forward[i] = curr.forward[i]
+			if curr.forward[i] != nil {
+				curr.forward[i].span[i] += (curr.span[i] - 1)
 			}
+
+		} else if curr != nil {
+			// 如果没有找到节点，说明这些层级比删除的节点的层级高，这些比删除节点高的节点，span 要 -1
+			// If the node is not found, it means these levels are higher than the level of the node to be deleted,
+			// so the span of these higher-level nodes needs to be decremented by 1
+			curr.span[i]--
 		}
 	}
 
