@@ -73,7 +73,7 @@ type RankList[K Ordered, V Ordered] struct {
 
 	// 用于快速查找的键值对字典
 	// Dictionary for fast key-value lookup
-	dict map[K]*Node[K, V]
+	dict map[K]V
 
 	// 当前跳表的最大层级
 	// Current maximum level of the skip list
@@ -98,7 +98,7 @@ func NewNode[K Ordered, V Ordered](key K, value V, level int) *Node[K, V] {
 func New[K Ordered, V Ordered]() *RankList[K, V] {
 	return &RankList[K, V]{
 		header: NewNode[K, V](ZeroValue[K](), ZeroValue[V](), MaxLevel),
-		dict:   make(map[K]*Node[K, V]),
+		dict:   make(map[K]V),
 		level:  1,
 	}
 }
@@ -125,8 +125,8 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 
 	// 如果节点已存在，先删除旧节点
 	// If node exists, remove old node first
-	if node, exists := sl.dict[key]; exists {
-		sl.del(node.data.Key)
+	if _, exists := sl.dict[key]; exists {
+		sl.del(key)
 	}
 
 	// 用于记录每层的前驱节点
@@ -170,7 +170,7 @@ func (sl *RankList[K, V]) Set(key K, value V) {
 	// 创建并插入新节点
 	// Create and insert new node
 	newNode := NewNode(key, value, level)
-	sl.dict[key] = newNode
+	sl.dict[key] = value
 	for i := 0; i < level; i++ {
 		newNode.forward[i] = prev[i].forward[i]
 		prev[i].forward[i] = newNode
@@ -217,7 +217,7 @@ func (sl *RankList[K, V]) Del(key K) bool {
 // del performs the actual deletion of a node from the skip list.
 // It searches for the node, updates the forward pointers, and adjusts the span values accordingly.
 func (sl *RankList[K, V]) del(key K) bool {
-	node, exists := sl.dict[key]
+	value, exists := sl.dict[key]
 	if !exists {
 		return false
 	}
@@ -231,8 +231,8 @@ func (sl *RankList[K, V]) del(key K) bool {
 	// Find the node to be deleted
 	for i := sl.level - 1; i >= 0; i-- {
 		for curr.forward[i] != nil &&
-			(curr.forward[i].data.Value < node.data.Value ||
-				(curr.forward[i].data.Value == node.data.Value && curr.forward[i].data.Key < key)) {
+			(curr.forward[i].data.Value < value ||
+				(curr.forward[i].data.Value == value && curr.forward[i].data.Key < key)) {
 			curr = curr.forward[i]
 		}
 		prev[i] = curr
@@ -241,10 +241,11 @@ func (sl *RankList[K, V]) del(key K) bool {
 	// 更新前向指针和跨度
 	// Update forward pointers and spans
 	for i := 0; i < sl.level; i++ {
-		if prev[i].forward[i] == node {
-			prev[i].forward[i] = node.forward[i]
-			if prev[i].forward[i] != nil {
-				prev[i].forward[i].span[i] += node.span[i] - 1
+		curr = prev[i].forward[i]
+		if curr != nil && curr.data.Key == key && curr.data.Value == value {
+			next := curr.forward[i]
+			if next != nil {
+				next.span[i] += curr.span[i] - 1
 			}
 		}
 	}
@@ -268,8 +269,8 @@ func (sl *RankList[K, V]) Get(key K) (V, bool) {
 	sl.RLock()
 	defer sl.RUnlock()
 
-	if node, exists := sl.dict[key]; exists {
-		return node.data.Value, true
+	if value, exists := sl.dict[key]; exists {
+		return value, true
 	}
 	return ZeroValue[V](), false
 }
@@ -282,7 +283,7 @@ func (sl *RankList[K, V]) Rank(key K) (int, bool) {
 	sl.RLock()
 	defer sl.RUnlock()
 
-	node, exists := sl.dict[key]
+	value, exists := sl.dict[key]
 	if !exists {
 		return 0, false
 	}
@@ -295,13 +296,13 @@ func (sl *RankList[K, V]) Rank(key K) (int, bool) {
 	for i := sl.level - 1; i >= 0; i-- {
 		for curr.forward[i] != nil {
 
-			if curr.forward[i].data.Value == node.data.Value && curr.forward[i].data.Key == key {
+			if curr.forward[i].data.Value == value && curr.forward[i].data.Key == key {
 				rank += curr.forward[i].span[i]
 				return rank, true
 			}
 
-			if curr.forward[i].data.Value > node.data.Value ||
-				(curr.forward[i].data.Value == node.data.Value && curr.forward[i].data.Key > key) {
+			if curr.forward[i].data.Value > value ||
+				(curr.forward[i].data.Value == value && curr.forward[i].data.Key > key) {
 				break
 			}
 

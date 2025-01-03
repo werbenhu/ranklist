@@ -140,7 +140,7 @@ func TestMassiveRank(t *testing.T) {
 
 func TestRankKeyNotExist(t *testing.T) {
 	sl := New[string, int]()
-	sl.dict["x"] = nil
+	sl.dict["x"] = 0
 
 	rank, exists := sl.Rank("x")
 	if exists {
